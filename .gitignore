@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.streamlit/
+.DS_Store
+backend/bin/
+*.part
+
+# legacy Streamlit build (not part of the FastAPI deployment)
+SmartGrid_Notebook_to_Streamlit/
+/app.py
+/requirements.txt
+/SmartGrid.txt
+/capstone_smartgrid_20000.csv

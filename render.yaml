@@ -1,0 +1,20 @@
+# Render Blueprint — deploys the Smart Grid ML API + dashboard on one click.
+# After the first deploy, every push to the `main` branch redeploys the site.
+#
+# Read more: https://render.com/docs/blueprint-spec
+
+databases: []
+
+services:
+  - type: web
+    name: smartgrid-ml
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    # build runtime
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+    healthCheckPath: /api/health

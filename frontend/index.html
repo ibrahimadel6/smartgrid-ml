@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Grid Analytics</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+</head>
+<body>
+
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+  <div class="bg-grid"></div>
+
+  <aside class="sidebar glass">
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <h1>Smart Grid</h1>
+        <span>Analytics · ML</span>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a class="nav-item active" data-view="dashboard"><span class="nav-ic">▦</span>Dashboard</a>
+      <a class="nav-item" data-view="eda"><span class="nav-ic">◎</span>EDA</a>
+      <a class="nav-item" data-view="processing"><span class="nav-ic">⚙</span>Processing</a>
+      <a class="nav-item" data-view="models"><span class="nav-ic">🧠</span>Models</a>
+      <a class="nav-item" data-view="predict"><span class="nav-ic">🎯</span>Predict</a>
+      <a class="nav-item" data-view="data"><span class="nav-ic">⛁</span>Data</a>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="status-chip" id="apiStatus"><span class="dot"></span>Connecting…</div>
+      <a class="download-link" href="/api/data/download">⬇ Download dataset</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h2 id="pageTitle">Dashboard</h2>
+        <p id="pageSub">2,000 hourly meter readings · EDA + 4 ML models</p>
+      </div>
+      <button class="btn-glass" id="refreshBtn">⟳ Refresh</button>
+    </header>
+
+    <!-- ============ DASHBOARD ============ -->
+    <section class="view active" id="view-dashboard">
+      <div class="kpi-grid" id="kpiGrid"></div>
+      <div class="grid-2">
+        <div class="card glass">
+          <h3>Consumption over time</h3>
+          <canvas id="consumptionChart" height="260"></canvas>
+        </div>
+        <div class="card glass">
+          <h3>Building mix</h3>
+          <canvas id="mixChart" height="240"></canvas>
+        </div>
+      </div>
+      <div class="card glass">
+        <h3>Model leaderboard</h3>
+        <canvas id="leaderboardChart" height="220"></canvas>
+      </div>
+    </section>
+
+    <!-- ============ EDA ============ -->
+    <section class="view" id="view-eda">
+      <div class="card glass">
+        <h3>Basic inspection</h3>
+        <div class="stat-row" id="edaStatRow"></div>
+        <table class="glass-table" id="edaDtypesTable"></table>
+      </div>
+      <div class="card glass">
+        <h3>Missing values</h3>
+        <table class="glass-table" id="missingTable"></table>
+      </div>
+      <div class="card glass">
+        <h3>Target distribution</h3>
+        <div class="target-cards" id="targetCards"></div>
+      </div>
+      <div class="card glass">
+        <h3>Outlier analysis (IQR)</h3>
+        <table class="glass-table" id="outlierTable"></table>
+      </div>
+      <div class="card glass">
+        <h3>Correlation heatmap</h3>
+        <div class="table-scroll"><div class="corr-heatmap" id="corrHeatmap"></div></div>
+      </div>
+      <div class="card glass">
+        <h3>Highly correlated pairs (≥ 0.80)</h3>
+        <table class="glass-table" id="corrPairsTable"></table>
+      </div>
+    </section>
+
+    <!-- ============ PROCESSING ============ -->
+    <section class="view" id="view-processing">
+      <div class="flow">
+        <div class="flow-node glass"><b>01</b> Timestamp → month/day/year + cyclic sin/cos</div>
+        <div class="flow-node glass"><b>02</b> Missing → median / mode</div>
+        <div class="flow-node glass"><b>03</b> Drop timestamp, meter_id</div>
+        <div class="flow-node glass"><b>04</b> One-hot encoding</div>
+        <div class="flow-node glass"><b>05</b> StandardScaler on numeric</div>
+        <div class="flow-node glass"><b>06</b> Final quality check</div>
+      </div>
+      <div class="grid-3" id="processCards"></div>
+      <div class="card glass">
+        <h3>Encoded features preview (df_encoded)</h3>
+        <div class="table-scroll"><table class="glass-table" id="encodedTable"></table></div>
+      </div>
+    </section>
+
+    <!-- ============ MODELS ============ -->
+    <section class="view" id="view-models">
+      <div class="model-grid" id="modelGrid"></div>
+      <div class="card glass" id="modelDetail"></div>
+    </section>
+
+    <!-- ============ PREDICT ============ -->
+    <section class="view" id="view-predict">
+      <div class="grid-2">
+        <div class="card glass">
+          <h3>New reading prediction</h3>
+          <div class="form-grid" id="predictForm"></div>
+          <button class="btn-primary" id="predictBtn">Run prediction</button>
+        </div>
+        <div class="card glass" id="predictResult">
+          <h3>Result</h3>
+          <div id="predictResultBody" class="placeholder">Pick a model, adjust features, and run.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DATA ============ -->
+    <section class="view" id="view-data">
+      <div class="card glass">
+        <div class="flex-between">
+          <h3>Raw data sample</h3>
+          <a class="btn-primary" href="/api/data/download">⬇ Download CSV</a>
+        </div>
+        <div class="stat-row" id="dataStatRow"></div>
+        <div class="table-scroll"><table class="glass-table" id="dataTable"></table></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/assets/plotly.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/charts.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
