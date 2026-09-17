@@ -13,3 +13,8 @@ SmartGrid_Notebook_to_Streamlit/
 /requirements.txt
 /SmartGrid.txt
 /capstone_smartgrid_20000.csv
+
+# abandoned hosting attempts
+hf_deploy/
+velixir_deploy/
+smartgrid-velixir.zip
