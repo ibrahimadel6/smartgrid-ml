@@ -6,6 +6,23 @@ A full-stack rebuild of the Smart Grid Machine Learning project:
 - **Frontend** — Pure HTML / CSS / Vanilla JS dashboard (high-tech dark theme, glassmorphism).
 - **No framework, no build step** — open-source-ready, easy to extend.
 
+## Live URLs 🌐
+
+| What | URL |
+|------|-----|
+| **Dashboard (frontend)** | https://frontendvercel-iota.vercel.app |
+| **REST API (FastAPI Cloud)** | https://smartgrid.fastapicloud.dev |
+| API interactive docs (`/docs`) | https://smartgrid.fastapicloud.dev/docs |
+
+## 📓 The analysis notebook
+
+`SmartGrid.ipynb` is the original data-science notebook behind this project —
+68 cells covering the full pipeline: EDA, missing values, duplicates, unique
+values, suspicious entries, IQR outlier analysis, correlation heatmaps,
+time-based feature engineering, missing-value handling, feature selection and
+preparation. GitHub renders `.ipynb` files natively in the browser, so you can
+read the whole analysis without installing anything.
+
 ## Folder structure
 
 ```
