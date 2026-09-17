@@ -88,3 +88,80 @@ POST /api/predict
 ```
 
 Interactive API docs are available at `/docs`.
+
+---
+
+## The four ML models
+
+The platform trains **four models** on the 20,000-row smart grid dataset, each
+answering a different question the grid operator cares about.
+
+| Model | Key | Task | Predicts | Business value |
+|-------|-----|------|----------|----------------|
+| **Logistic Regression** | `logistic` | Classification | `anomaly_flag` — is this reading anomalous? | Baseline, fast, and explainable. Flags suspicious meters/readings for review. |
+| **Ridge Regression** | `ridge` | Regression | `next_hour_consumption_kwh` — kWh next hour | Load forecasting → capacity planning and demand-side management. |
+| **Random Forest** | `random_forest` | Classification | `anomaly_flag` | More accurate anomalies with feature-importance insights (which drivers caused the flag). |
+| **XGBoost** | `xgboost` | Classification | `high_usage_flag` — is consumption about to spike? | Early warning for peak-demand events → pricing and load-shedding decisions. |
+
+### What each model actually does for the grid
+
+- **Logistic Regression** is the *baseline classifier*: it learns a linear
+  decision boundary between normal and anomalous readings. Because the dataset
+  is imbalanced, the reported `probability` is the calibrated probability of
+  the *positive (anomaly / high-usage)* class — the UI shows the complement as
+  `P(Normal) = 1 − probability`.
+
+- **Ridge Regression** is the *forecaster*: it maps weather + tariff + usage
+  features to the **next hour's consumption**. It uses `L2` regularization, so
+  it stays robust even when input features are correlated. The prediction is a
+  continuous kWh value.
+
+- **Random Forest** is the *robust anomaly detector*: an ensemble of decision
+  trees that captures non-linear patterns Linear Regression can miss, and it
+  is less sensitive to outliers/feature scaling. Good default for anomaly
+  detection when you need more signal than the linear baseline.
+
+- **XGBoost** is the *peak-spike warning*: gradient-boosted trees optimize for
+  a stronger `high_usage_flag` (consumption much higher than expected). In the
+  leaderboard (`/api/models`) you can compare it against the others by
+  accuracy / precision / recall / F1.
+
+### Feature boundary rules
+
+Before any model sees your input, the API enforces the same bounds the models
+were trained on (`backend/app/validation.py` is the single source of truth,
+mirrored by the frontend form):
+
+- Numeric ranges mirror the training data (`temp_c`, `humidity_pct`,
+  `consumption_kwh`, `grid_price_usd_per_kwh`, `hour`, `day_of_week` …).
+- `hour` and `day_of_week` must be whole numbers.
+- `region` ∈ {`MW`, `NE`, `SE`, `SW`, `W`}, `building_type` ∈
+  {`residential`, `commercial`, `industrial`}, `tariff_tier` ∈
+  {`mid_peak`, `off_peak`, `on_peak`}.
+
+Why enforce them? **Linear models extrapolate wildly outside their training
+range** — e.g. Logistic Regression can report ~100% anomaly probability for an
+impossible input. Restricting to dataset ranges keeps every prediction
+physically meaningful.
+
+### Example: model comparison (leaderboard)
+
+`GET /api/models` returns the metrics for all four models so you can compare
+them side by side:
+
+```json
+{
+  "logistic": {
+    "task": "anomaly_flag",
+    "kind": "classification",
+    "accuracy": 0.93,
+    ...
+  },
+  "ridge": {
+    "task": "next_hour_consumption_kwh",
+    "kind": "regression",
+    "r2": 0.87,
+    ...
+  }
+}
+```
